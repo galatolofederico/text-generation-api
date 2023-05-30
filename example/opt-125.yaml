@@ -1,5 +1,4 @@
-model:
-  name: facebook/opt-125m
+device: cpu
 
-tokenizer:
+model:
   name: facebook/opt-125m
