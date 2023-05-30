@@ -1,28 +1,36 @@
 import argparse
 import os
 import yaml
-from collections.abc import MutableMapping as Map
 
+from text_generation_api.utils import nested_update
+from text_generation_api.inference import Inference
 
 default_config = {
+    "device": "cuda",
     "model": {
         "class": "AutoModelForCausalLM",
         "load": {
             "device_map": "auto"
+        },
+        "generate": {
+            "do_sample": True,
+            "temperature": 0.8,
+            "top_p": 0.95,
+            "max_new_tokens": 512
+        },
+        "stop": {
+            "ids": [],
+            "words": []
         }
     },
     "tokenizer": {
         "class": "AutoTokenizer",
+        "load": {
+        },
+        "tokenize": {
+        },
     },
 }
-
-
-def nested_update(d, v):
-    for key in v:
-        if key in d and isinstance(d[key], Map) and isinstance(v[key], Map):
-            nested_update(d[key], v[key])
-        else:
-            d[key] = v[key]
 
 def main():
     parser = argparse.ArgumentParser(description='Text generation API server')
@@ -39,5 +47,11 @@ def main():
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
     
+    assert "name" in config["model"], "Model name not specified"
     nested_update(config, default_config)
 
+    if not "name" in config["tokenizer"]:
+        config["tokenizer"]["name"] = config["model"]["name"]
+
+    print(config)
+    inference = Inference(config)
