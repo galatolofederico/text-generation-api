@@ -1,5 +1,5 @@
 model:
-  name: "facebook/opt-125m"
+  name: facebook/opt-125m
 
 tokenizer:
-  name: "facebook/opt-125m
+  name: facebook/opt-125m
