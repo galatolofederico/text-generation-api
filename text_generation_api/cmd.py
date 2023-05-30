@@ -1,6 +1,28 @@
 import argparse
 import os
 import yaml
+from collections.abc import MutableMapping as Map
+
+
+default_config = {
+    "model": {
+        "class": "AutoModelForCausalLM",
+        "load": {
+            "device_map": "auto"
+        }
+    },
+    "tokenizer": {
+        "class": "AutoTokenizer",
+    },
+}
+
+
+def nested_update(d, v):
+    for key in v:
+        if key in d and isinstance(d[key], Map) and isinstance(v[key], Map):
+            nested_update(d[key], v[key])
+        else:
+            d[key] = v[key]
 
 def main():
     parser = argparse.ArgumentParser(description='Text generation API server')
@@ -17,10 +39,5 @@ def main():
     with open(args.config, "r") as f:
         config = yaml.safe_load(f)
     
-    assert "model" in config, "Model configuration not found"
-    assert "name" in config["model"], "You need to at least specify the model name"
+    nested_update(config, default_config)
 
-    if "name" not in config["tokenizer"]:
-        config["tokenizer"]["name"] = config["model"]["name"]
-    
-    
