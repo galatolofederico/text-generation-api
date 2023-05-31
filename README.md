@@ -20,6 +20,7 @@ result = tga.generate(
 
 - Serve every [🤗 huggingface](https://huggingface.co/) model 🔥
 - Batteries included🔋
+- Built-in stop text or stop token
 - Nice one line serving and generation 😎
 
 ## Installation ⚙️
@@ -100,6 +101,42 @@ result = tga.generate(
     prompt="<PROMPT>"
 )
 ```
+
+You can pass `generate` or `tokenize` arguments with:
+
+```python
+from text_generation_api import Endpoint
+tga = Endpoint("http://<host>:<port>")
+
+result = tga.generate(
+    model="<MODEL-NAME>",
+    prompt="<PROMPT>",
+    generate=dict(
+        temperature=0.2,
+        top_p=0.2
+    )
+)
+```
+
+Use the argument `stop` to control the stop beheviour
+
+```python
+from text_generation_api import Endpoint
+tga = Endpoint("http://<host>:<port>")
+
+result = tga.generate(
+    model="gpt2",
+    prompt="Human: How are you?\nAI:",
+    generate=dict(
+        temperature=0.2,
+        top_p=0.2
+    ),
+    stop=dict(
+        words=["\n"]
+    )
+)
+```
+
 
 ## Contributions and license 🪪
 
