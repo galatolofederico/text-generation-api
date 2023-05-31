@@ -32,7 +32,7 @@ virtualenv --python=python3.10 text-generation-api-env
 . ./text-generation-api-env/bin/activate
 ```
 
-Install `pytorch` (or `tensorflow`). Again, you can use whatever package manager you like
+For the server install `pytorch` (or `tensorflow`). Again, you can use whatever package manager you like
 
 ```
 pip install "torch>=2.0.0"
@@ -77,7 +77,7 @@ tokenizer:
 
 You can specify which device to use with `device` and which backend to use with `backend: pytorch` or `backend: tensorflow`
 
-To run the inference server run
+To run the inference server run:
 
 ```
 text-generation-api ./path/to/config1.yaml ./path/to/config2.yaml
@@ -86,6 +86,37 @@ text-generation-api ./path/to/config1.yaml ./path/to/config2.yaml
 For example:
 ```
 text-generation-api ./example/gpt2.yaml  ./example/opt-125.yaml
+```
+
+And you will see something like:
+
+```
+Loading ./example/gpt2.yaml...
+Loading ./example/opt-125.yaml...
+Starting server...
+
+To generate text:
+
+from text_generation_api import Endpoint
+tga = Endpoint("http://127.0.0.1:3000")
+
+#model gpt2
+result = tga.generate(
+        model="gpt2",
+        prompt="Here is a list of things I like to do:"
+)
+
+#model facebook/opt-125m
+result = tga.generate(
+        model="facebook-opt-125m",
+        prompt="Here is a list of things I like to do:"
+)
+
+
+INFO:     Started server process [2052610]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:3000 (Press CTRL+C to quit)
 ```
 
 ## Run the client ✨
