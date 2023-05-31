@@ -4,25 +4,25 @@ import time
 from text_generation_api.utils import nested_update
 
 class GeneratorStoppingCriteria(transformers.StoppingCriteria):
-    def __init__(self, *, prompt_tokens, stop_ids=[], stop_words=[], tokenizer=None):
+    def __init__(self, *, prompt_tokens, ids=[], words=[], tokenizer=None):
         self.prompt_tokens = prompt_tokens
-        self.stop_ids = stop_ids
-        self.stop_words = stop_words
+        self.ids = ids
+        self.words = words
         self.tokenizer = tokenizer
     
     def __call__(self, input_ids, scores):
-        if self.stop_ids is not None:
+        if self.ids is not None:
             do_stop = [False for _ in range(len(input_ids))]
             for i, (t, p) in enumerate(zip(input_ids, self.prompt_tokens)):
                 g = t[len(p):].tolist()
-                for stop_id in self.stop_ids:
+                for stop_id in self.ids:
                     if stop_id in g:
                         do_stop[i] = True
 
             if all(do_stop):
                 return True
 
-        if self.stop_words is not None:
+        if self.words is not None:
             do_stop = [False for _ in range(len(input_ids))]
             for i, (t, p) in enumerate(zip(input_ids, self.prompt_tokens)):
                 t = t.clone()
@@ -30,7 +30,7 @@ class GeneratorStoppingCriteria(transformers.StoppingCriteria):
                 g[g == self.tokenizer.pad_id] = self.tokenizer.eos_id
                 g = g.tolist()
                 d = self.tokenizer.decode(g)
-                for stop_word in self.stop_words:
+                for stop_word in self.words:
                     if stop_word in d:
                         do_stop[i] = True
 
@@ -45,6 +45,12 @@ class Inference:
         self.config = config.copy()
 
         self.device = self.config["device"]
+        if config["backend"] == "pytorch":
+            self.backend = "pt"
+        elif config["backend"] == "tensorflow":
+            self.backend = "tf"
+        else:
+            raise ValueError("Backend not supported")
 
         tokenizer_name = self.config["tokenizer"]["name"]
         model_name = self.config["model"]["name"]
@@ -65,17 +71,27 @@ class Inference:
             from peft import PeftModel
             self.model = PeftModel.from_pretrained(self.model, **self.config["peft"]["load"]).to(self.device)
 
+    def test(self):
+        return self.generate({"prompt": self.config["test"]})
+
     def generate(self, args):
         assert "prompt" in args, "prompt is required"
-        if isinstance(args.prompt, str):
-            args.prompt = [args.prompt]
+        if isinstance(args["prompt"], str):
+            args["prompt"] = [args["prompt"]]
+
+        if "generate" not in args:
+            args["generate"] = dict()
+        if "tokenize" not in args:
+            args["tokenize"] = dict()
+        if "stop" not in args:
+            args["stop"] = dict()
 
         nested_update(args["generate"], self.config["model"]["generate"])
         nested_update(args["tokenize"], self.config["tokenizer"]["tokenize"])
         nested_update(args["stop"], self.config["model"]["stop"])
 
         t0 = time.time()
-        inputs = self.tokenizer(args["prompt"], return_tensors="pt").to(self.device)
+        inputs = self.tokenizer(args["prompt"], return_tensors=self.backend).to(self.device)
         tokens = self.model.generate(
             **inputs,
             **args["generate"],
@@ -96,4 +112,3 @@ class Inference:
         }
 
         return {"generated": generated, "stats": stats}
-
