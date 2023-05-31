@@ -1,0 +1,9 @@
+device: cuda
+
+model:
+  name: gpt2
+  class: GPT2Model
+
+tokenizer:
+  name: gpt2
+  class: GPT2Tokenizer
