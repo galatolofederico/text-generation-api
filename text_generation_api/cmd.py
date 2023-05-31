@@ -41,9 +41,19 @@ def main():
             print("====")
     else:
         import uvicorn
-
         print("Starting server...")
-        for endpoint, inference in inferences.items():
-            print(BOLD+OKGREEN+"Model "+inference.config["model"]["name"]+" available at http://"+args.host+":"+str(args.port)+"/generate/"+endpoint+ENDC)
+        print()
+        print()
+        print(BOLD+OKGREEN+"To generate text:"+ENDC)
+        print()
+        print(BOLD+"from text_generation_api import Endpoint")
+        print("endpoint = Endpoint(\"http://"+args.host+":"+str(args.port)+"\")")
+        print()
+        for model, inference in inferences.items():
+            print("#model "+inference.config["model"]["name"])
+            print("result = endpoint.generate(\n\tmodel=\""+model+"\",\n\tprompt=\"Here is a list of things I like to do:\"\n)")
+            print()
+        print()
+        print(ENDC)
         app = create_app(inferences, token=args.token)
         uvicorn.run(app, host=args.host, port=args.port)
