@@ -86,6 +86,13 @@ class Inference:
         if "stop" not in args:
             args["stop"] = dict()
 
+        if args["generate"] is None:
+            args["generate"] = dict()
+        if args["tokenize"] is None:
+            args["tokenize"] = dict()
+        if args["stop"] is None:
+            args["stop"] = dict()
+
         nested_update(args["generate"], self.config["model"]["generate"])
         nested_update(args["tokenize"], self.config["tokenizer"]["tokenize"])
         nested_update(args["stop"], self.config["model"]["stop"])

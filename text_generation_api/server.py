@@ -30,6 +30,12 @@ def create_app(inferences, token=None):
 
     @app.get("/generate/{model}")
     def generate(model, gen_args: GenerateRequest, authorized: bool = Depends(verify_factory(token))):
-        return "ciao"
+        if model not in inferences:
+            raise HTTPException(
+                status_code=404,
+                detail="Model not found"
+            )
+        print(dict(gen_args))
+        return inferences[model].generate(dict(gen_args))
 
     return app
