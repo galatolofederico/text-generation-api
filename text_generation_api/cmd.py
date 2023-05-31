@@ -47,11 +47,11 @@ def main():
         print(BOLD+OKGREEN+"To generate text:"+ENDC)
         print()
         print(BOLD+"from text_generation_api import Endpoint")
-        print("endpoint = Endpoint(\"http://"+args.host+":"+str(args.port)+"\")")
+        print("tga = Endpoint(\"http://"+args.host+":"+str(args.port)+"\")")
         print()
         for model, inference in inferences.items():
             print("#model "+inference.config["model"]["name"])
-            print("result = endpoint.generate(\n\tmodel=\""+model+"\",\n\tprompt=\"Here is a list of things I like to do:\"\n)")
+            print("result = tga.generate(\n\tmodel=\""+model+"\",\n\tprompt=\"Here is a list of things I like to do:\"\n)")
             print()
         print()
         print(ENDC)
