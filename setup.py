@@ -22,7 +22,6 @@ setuptools.setup(
     install_requires=[
         "transformers==4.29.2",
         "PyYAML==6.0",
-        "accelerate==0.19.0"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",
