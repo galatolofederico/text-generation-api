@@ -16,13 +16,14 @@ def main():
     parser.add_argument("--port", help="Port to listen to", type=int, default=3000)
     parser.add_argument("--token", help="Token to use for authentication", type=str, default=None)
     parser.add_argument("--test", help="Run in test mode", action="store_true")
+    parser.add_argument("--debug", help="Run in test mode", action="store_true")
 
     args = parser.parse_args()
 
     inferences = dict()
     for config_file in args.configs:
         print("Loading "+config_file+"...")
-        inference = Inference(process_config(config_file))
+        inference = Inference(process_config(config_file), debug=args.debug)
         if "endpoint" not in inference.config:
             endpoint = inference.config["model"]["name"].replace("/", "-")
         else:

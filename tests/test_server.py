@@ -34,7 +34,7 @@ class TestInference(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestInference, self).__init__(*args, **kwargs)
         self.inference = {
-            "test-endpoint": Inference(process_config(test_config))
+            "test-endpoint": Inference(process_config(test_config), debug=True)
         }
         app = create_app(self.inference)
         config = uvicorn.Config(app, host=test_host, port=test_port)
@@ -47,3 +47,5 @@ class TestInference(unittest.TestCase):
                 model="test-endpoint",
                 prompt="Here is a list of things I like to do:"
             )
+            assert "generated" in result
+            assert "stats" in result

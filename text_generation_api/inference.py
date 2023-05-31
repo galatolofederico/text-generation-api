@@ -41,8 +41,9 @@ class GeneratorStoppingCriteria(transformers.StoppingCriteria):
 
 
 class Inference:
-    def __init__(self, config):
+    def __init__(self, config, debug=False):
         self.config = config.copy()
+        self.debug = debug
 
         self.device = self.config["device"]
         if config["backend"] == "pytorch":
@@ -55,11 +56,21 @@ class Inference:
         tokenizer_name = self.config["tokenizer"]["name"]
         model_name = self.config["model"]["name"]
 
+        if self.debug:
+            print("Tokenizer name:", tokenizer_name)
+            print("Tokenizer loading class: ", self.config["tokenizer"]["class"])
+            print("Tokenizer loading arguments: ", self.config["tokenizer"]["load"])
+
         tokenizer_cls = getattr(transformers, self.config["tokenizer"]["class"])
         self.tokenizer = tokenizer_cls.from_pretrained(
             tokenizer_name,
             **self.config["tokenizer"]["load"]
         )
+
+        if self.debug:
+            print("Model name:", model_name)
+            print("Model loading class: ", self.config["model"]["class"])
+            print("Model loading arguments: ", self.config["model"]["load"])
 
         model_cls = getattr(transformers, self.config["model"]["class"])
         self.model = model_cls.from_pretrained(
@@ -69,7 +80,17 @@ class Inference:
         
         if "peft" in self.config:
             from peft import PeftModel
-            self.model = PeftModel.from_pretrained(self.model, **self.config["peft"]["load"]).to(self.device)
+            peft_model_name = self.config["peft"]["name"]
+
+            if self.debug:
+                print("PEFT model name:", peft_model_name)
+                print("PEFT loading arguments: ", self.config["peft"]["load"])
+                
+            self.model = PeftModel.from_pretrained(
+                self.model,
+                peft_model_name,
+                **self.config["peft"]["load"]
+            ).to(self.device)
 
     def test(self):
         return self.generate({"prompt": self.config["test"]})
@@ -97,10 +118,17 @@ class Inference:
         nested_update(args["tokenize"], self.config["tokenizer"]["tokenize"])
         nested_update(args["stop"], self.config["model"]["stop"])
 
+        if self.debug:
+            print("Prompt:", args["prompt"])
+            print("Generate arguments:", args["generate"])
+            print("Tokenize arguments:", args["tokenize"])
+            print("Stop arguments:", args["stop"])
+
         t0 = time.time()
         inputs = self.tokenizer(
             args["prompt"],
-            return_tensors=self.backend
+            return_tensors=self.backend,
+            **args["tokenize"]
         ).to(self.device)
         tokens = self.model.generate(
             **inputs,

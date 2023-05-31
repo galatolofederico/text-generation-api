@@ -16,4 +16,4 @@ class Endpoint:
                 "stop": stop,
             }
         )
-        print(res.json())
+        return res.json()
