@@ -16,6 +16,12 @@ result = tga.generate(
 )
 ```
 
+## Features 🏆
+
+- Serve every [🤗 huggingface](https://huggingface.co/) model 🔥
+- Batteries included🔋
+- Nice one line serving and generation 😎
+
 ## Installation ⚙️
 
 (optional) Create a `virtualenv`. You can use `conda` or whatever you like
@@ -37,7 +43,7 @@ Install `text-generation-api`
 pip install text-generation-api
 ```
 
-## Usage ✨
+## Run the server 🌐
 
 Create `yaml` config files for the models you want to serve
 
@@ -53,4 +59,45 @@ tokenizer:
   class: GPT2Tokenizer
 ```
 
+To specify load arguments for the model or the tokenizer use the `load` key like:
+
+```yaml
+model:
+  name: my-model
+  class: GPT2Model
+  load:
+    device_map: auto
+    trust_remote_code: True
+
+tokenizer:
+  name: gpt2
+  class: GPT2Tokenizer
+```
+
 You can specify which device to use with `device` and which backend to use with `backend: pytorch` or `backend: tensorflow`
+
+To run the inference server run
+
+```
+text-generation-api ./path/to/config1.yaml ./path/to/config2.yaml
+```
+
+For example:
+```
+text-generation-api ./example/gpt2.yaml  ./example/opt-125.yaml
+```
+
+## Run the client ✨
+
+To run the inference on the remote server using the client simply:
+
+```python
+from text_generation_api import Endpoint
+tga = Endpoint("http://<host>:<port>")
+
+result = tga.generate(
+    model="<MODEL-NAME>",
+    prompt="<PROMPT>"
+)
+```
+
