@@ -5,7 +5,7 @@ import yaml
 from text_generation_api.default import default_config
 from text_generation_api.utils import nested_update
 from text_generation_api.inference import Inference
-
+from text_generation_api.server import create_app
 
 def process_config(config_file):
     assert os.path.exists(config_file), "Configuration file not found"
@@ -41,7 +41,7 @@ def main():
 
     parser.add_argument("configs", nargs="+", help="Path to the configuration files", type=str)
     parser.add_argument("--host", help="Host to listen to", type=str, default="0.0.0.0")
-    parser.add_argument("--port", help="Port to listen to", type=int, default=8080)
+    parser.add_argument("--port", help="Port to listen to", type=int, default=3000)
     parser.add_argument("--token", help="Token to use for authentication", type=str, default=None)
     parser.add_argument("--test", help="Run in test mode", action="store_true")
 
@@ -49,6 +49,7 @@ def main():
 
     inferences = []
     for config_file in args.configs:
+        print("Loading "+config_file+"...")
         inferences.append(Inference(process_config(config_file)))
 
     if args.test:
@@ -60,3 +61,8 @@ def main():
             print("== INFERENCE ==")
             print(inference.test())
             print("====")
+    else:
+        import uvicorn
+        print("Starting server...")
+        app = create_app(inferences, token=args.token)
+        uvicorn.run(app, host=args.host, port=args.port)
