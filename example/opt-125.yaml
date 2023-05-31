@@ -1,4 +1,2 @@
-device: cuda
-
 model:
   name: facebook/opt-125m

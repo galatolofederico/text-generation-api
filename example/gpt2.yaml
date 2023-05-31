@@ -1,5 +1,3 @@
-device: cuda
-
 model:
   name: gpt2
   class: GPT2Model
