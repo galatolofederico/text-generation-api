@@ -18,7 +18,7 @@ result = tga.generate(
 
 ## Features 🏆
 
-- Serve every [🤗 huggingface](https://huggingface.co/) model 🔥
+- Serve (almost) every text generation [🤗 huggingface](https://huggingface.co/) model 🔥
 - Batteries included🔋
 - Built-in stop text or stop token
 - Nice one line serving and generation 😎
