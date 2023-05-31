@@ -47,15 +47,16 @@ def main():
 
     args = parser.parse_args()
 
-    inferences = []
+    inferences = dict()
     for config_file in args.configs:
         print("Loading "+config_file+"...")
-        inferences.append(Inference(process_config(config_file)))
-
+        inference = Inference(process_config(config_file))
+        inferences[inference.config["model"]["name"]] = inference
+    
     if args.test:
-        for inference in inferences:
+        for name, inference in inferences.items():
             print("====")
-            print("Testing :"+inference.config["model"]["name"])
+            print("Testing :"+name)
             print("== CONFIG ==")
             print(inference.config)
             print("== INFERENCE ==")

@@ -91,7 +91,10 @@ class Inference:
         nested_update(args["stop"], self.config["model"]["stop"])
 
         t0 = time.time()
-        inputs = self.tokenizer(args["prompt"], return_tensors=self.backend).to(self.device)
+        inputs = self.tokenizer(
+            args["prompt"],
+            return_tensors=self.backend
+        ).to(self.device)
         tokens = self.model.generate(
             **inputs,
             **args["generate"],
