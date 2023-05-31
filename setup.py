@@ -23,7 +23,8 @@ setuptools.setup(
         "transformers==4.29.2",
         "PyYAML==6.0",
         "fastapi==0.95.2",
-        "uvicorn==0.22.0"
+        "uvicorn==0.22.0",
+        "httpx==0.24.1"
     ],
     classifiers=[
         "Programming Language :: Python :: 3.8",

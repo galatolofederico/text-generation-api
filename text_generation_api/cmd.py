@@ -1,40 +1,12 @@
 import argparse
-import os
-import yaml
 
-from text_generation_api.default import default_config
-from text_generation_api.utils import nested_update
+from text_generation_api.utils import nested_update, process_config
 from text_generation_api.inference import Inference
 from text_generation_api.server import create_app
 
-def process_config(config_file):
-    assert os.path.exists(config_file), "Configuration file not found"
-
-    with open(config_file, "r") as f:
-        config = yaml.safe_load(f)
-
-    if "backend" not in config:
-        config["backend"] = "pytorch"
-    
-    assert config["backend"] in ["pytorch", "tensorflow"], "Backend not supported"
-    if config["backend"] == "pytorch":
-        try:
-            import torch
-        except ImportError:
-            raise ImportError("PyTorch not installed")
-    elif config["backend"] == "tensorflow":
-        try:
-            import tensorflow
-        except ImportError:
-            raise ImportError("TensorFlow not installed")
-    
-    assert "name" in config["model"], "Model name not specified"
-    nested_update(config, default_config)
-
-    if not "name" in config["tokenizer"]:
-        config["tokenizer"]["name"] = config["model"]["name"]
-
-    return config
+OKGREEN = '\033[92m'
+ENDC = '\033[0m'
+BOLD = '\033[1m'
 
 def main():
     parser = argparse.ArgumentParser(description='Text generation API server')
@@ -51,12 +23,16 @@ def main():
     for config_file in args.configs:
         print("Loading "+config_file+"...")
         inference = Inference(process_config(config_file))
-        inferences[inference.config["model"]["name"]] = inference
+        if "endpoint" not in inference.config:
+            endpoint = inference.config["model"]["name"].replace("/", "-")
+        else:
+            endpoint = inference.config["endpoint"]
+        inferences[endpoint] = inference
     
     if args.test:
-        for name, inference in inferences.items():
+        for endpoint, inference in inferences.items():
             print("====")
-            print("Testing :"+name)
+            print("Testing :"+inference.config["model"]["name"])
             print("== CONFIG ==")
             print(inference.config)
             print("== INFERENCE ==")
@@ -64,6 +40,9 @@ def main():
             print("====")
     else:
         import uvicorn
+
         print("Starting server...")
+        for endpoint, inference in inferences.items():
+            print(BOLD+OKGREEN+"Model "+inference.config["model"]["name"]+" available at http://"+args.host+":"+str(args.port)+"/generate/"+endpoint+ENDC)
         app = create_app(inferences, token=args.token)
         uvicorn.run(app, host=args.host, port=args.port)
